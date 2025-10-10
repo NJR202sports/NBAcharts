@@ -34,7 +34,7 @@
 ---
 
 ## 🏗️ 系統架構
-
+```mermaid
 graph TD
     %% 定義風格：數據流用藍色
     linkStyle default stroke:#007bff,stroke-width:2px
@@ -79,7 +79,7 @@ graph TD
     style P fill:#4CAF50,color:#fff
     style M fill:#ADD8E6,color:#333
     style BQ fill:#FFD700,color:#333
-
+```
 
 
 ### 🎮 數據流程說明
