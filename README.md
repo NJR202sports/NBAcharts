@@ -35,59 +35,7 @@
 
 ## 🏗️ 系統架構
 
-這是一套包含**數據擷取**、**ETL (擷取、轉換、載入)**、**數據倉儲**到**商業智慧 (BI) 視覺化**的完整解決方案。
-
-```mermaid
-graph TD
-    subgraph " "
-        direction LR
-        subgraph "A[🌐 資料來源]"
-            direction TB
-            A1[NBA.com API]
-            A2[HoopsHype]
-            A3[UDN News]
-        end
-        
-        subgraph "B[🐳 Docker 容器化服務]"
-            direction TB
-            B1["🐍 Python Producers <br> (數據擷取引擎)"]
-            B2["🚀 Airflow <br> (工作流管理)"]
-            B3["🗄️ MySQL <br> (主要數據庫)"]
-            B4["📊 Metabase <br> (商業智慧儀表板)"]
-        end
-
-        subgraph "C[☁️ Google Cloud Platform]"
-            C1["📊 BigQuery <br> (數據倉儲)"]
-        end
-    end
-
-    %% Data Flow
-    A1 & A2 & A3 --> B2
-    B2 -- 觸發 --> B1
-    B1 -- 寫入 --> B3
-    B2 -- 同步 --> C1
-    B3 -.-> B2
-    B3 --> B4
-    C1 --> B4
-    
-    %% Network
-    subgraph D[🌐 Docker 網路: NBA_network]
-        B1 --- B2
-        B2 --- B3
-        B3 --- B4
-    end
-
-    %% Styles
-    classDef source fill:#fff0f0,stroke:#ff6d6d,stroke-width:2px;
-    classDef docker fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px;
-    classDef cloud fill:#e6f7ff,stroke:#00a2ff,stroke-width:2px;
-    classDef network fill:#f0fff0,stroke:#3cb371,stroke-width:2px;
-
-    class A,A1,A2,A3 source;
-    class B,B1,B2,B3,B4 docker;
-    class C,C1 cloud;
-    class D network
-```
+![系統架構圖](images/Diagram.jpg)
 
 ### 🎮 數據流程說明
 1. **🏀 多源數據擷取** - Python爬蟲引擎同步擷取NBA官方、薪資、新聞等多元數據
