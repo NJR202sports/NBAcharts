@@ -24,21 +24,12 @@
 ### 🎯 核心特性
 
 - **🏀 NBA全方位數據** - 涵蓋球隊與球員的狀態、進階統計、薪資分析與最新新聞
-- **🗓️ 智慧工作流管理** - Airflow DAGs 實現數據擷取任務的自動排程與全面監控
+- **🗓️ 智慧工作流管理** - Airflow 實現數據擷取任務的自動排程與全面監控
 - **🗄️ 企業級數據存儲** - 採用 MySQL 資料庫確保數據完整性與查詢效能
-- **☁️ 雲端數據倉儲** - 整合 Google BigQuery 實現大數據分析與長期存儲
 - **🔄 自動化數據同步** - MySQL 到 BigQuery 的自動同步機制
+- **☁️ 雲端數據倉儲** - 整合 Google BigQuery 實現大數據分析與長期存儲
 - **� 商業智慧視覺化** - 透過 Metabase 建立專業級互動式儀表板
 - **🐳 一鍵容器化部署** - 每個服務獨立容器化，透過共用網路實現完美互聯
-
----
-
-### 🎮 數據流程說明
-1. **🏀 多源數據擷取** - Python爬蟲引擎同步擷取NBA官方、薪資、新聞等多元數據
-2. **🔄 自動化編排** - Airflow DAG智慧管理整個ETL流程
-3. **💾 可靠數據存儲** - MySQL確保數據完整性與高效查詢
-4. **☁️ 雲端數據倉儲** - 自動同步數據到BigQuery進行大數據分析
-5. **📈 專業視覺化** - Metabase整合MySQL與BigQuery打造企業級分析儀表板
 
 ---
 
@@ -138,18 +129,7 @@ docker compose --env-file .env -f airflow/docker-compose-airflow.yml up -d
 docker compose --env-file .env -f metabase/docker-compose-metabase.yml up -d
 ```
 
-### 🏀 第四節：BigQuery 設定
-
-在啟動服務前，請先設定 Google Cloud Platform：
-
-```bash
-
-# 🔧 設定環境變數
-# 在 .env 檔案中加入：
-# GCP_PROJECT_ID=your-project-id
-```
-
-### 🏀 第五節：服務入口與管理介面
+### 🏀 第四節：服務入口與管理介面
 
 | 🎯 服務 | 🌐 網址 | 👤 帳號密碼 | 📝 說明 |
 |---------|---------|-------------|---------|
@@ -185,8 +165,6 @@ docker compose --env-file .env -f metabase/docker-compose-metabase.yml up -d
 
 ```bash
 docker compose -f metabase/docker-compose-metabase.yml down
-docker compose -f docker-compose-producer.yml down
-docker compose -f docker-compose-worker.yml down
 docker compose -f airflow/docker-compose-airflow.yml down
 docker compose -f docker-compose-mysql.yml down
 ```
