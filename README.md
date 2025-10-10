@@ -1,16 +1,15 @@
 <div align="center">
 
 # 🏀 NBAcharts
-### *企業級NBA數據分析與視覺化平台*
+### *NBA數據分析與視覺化平台*
 
-[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Apache Airflow](https://img.shields.io/badge/Apache%20Airflow-017CEE?style=for-the-badge&logo=Apache%20Airflow&logoColor=white)](https://airflow.apache.org)
 [![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
 [![BigQuery](https://img.shields.io/badge/BigQuery-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white)](https://cloud.google.com/bigquery)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
-[![Celery](https://img.shields.io/badge/Celery-37B24D?style=for-the-badge&logo=celery&logoColor=white)](https://docs.celeryproject.org)
 
-*像Kobe一樣精準，如LeBron般全能的NBA數據分析系統* 🐍⚡
+*像Curry一樣精準，如LeBron般全能的NBA數據分析系統* 🐍⚡
 
 </div>
 
@@ -20,7 +19,7 @@
 
 > **"數據不會說謊，就像投籃命中率一樣真實"** - 這個平台讓你成為NBA數據分析的MVP！
 
-這是一個基於 Python 的**企業級NBA數據工程解決方案**，實現從數據擷取到視覺化的完整流程。所有服務都在 Docker 容器中運行，透過 Docker Compose 實現一鍵部署與管理，就像完美的團隊配合一樣流暢！
+這是一個基於 Python 的**NBA數據工程解決方案**，實現從數據擷取到視覺化的完整流程。所有服務都在 Docker 容器中運行，透過 Docker Compose 實現一鍵部署與管理，就像完美的團隊配合一樣流暢！
 
 ### 🎯 核心特性
 
@@ -36,75 +35,58 @@
 
 ## 🏗️ 系統架構
 
-以下架構圖展示了各個容器如何協同工作，以及數據流動的完整路徑：
+這是一套包含**數據擷取**、**ETL (擷取、轉換、載入)**、**數據倉儲**到**商業智慧 (BI) 視覺化**的完整解決方案。
 
 ```mermaid
-flowchart LR
-  %% Sources
-  subgraph "🌐 資料來源"
-    S1[🏀 NBA.com 官方數據]
-    S2[💰 HoopsHype 薪資數據]
-    S3[📰 UDN 體育新聞]
-  end
+graph TD
+    subgraph " "
+        direction LR
+        subgraph "A[🌐 資料來源]"
+            direction TB
+            A1[NBA.com API]
+            A2[HoopsHype]
+            A3[UDN News]
+        end
+        
+        subgraph "B[🐳 Docker 容器化服務]"
+            direction TB
+            B1[🐍 Python Producers <br> (數據擷取引擎)]
+            B2[🚀 Airflow <br> (工作流管理)]
+            B3[🗄️ MySQL <br> (主要數據庫)]
+            B4[📊 Metabase <br> (商業智慧儀表板)]
+        end
 
-  %% Containers
-  subgraph "🐳 Docker 容器生態系統"
-    direction TB
-    P[🐍 Python 數據擷取引擎]
-    DB[🗄️ MySQL 資料庫]
-    AF[🚀 Airflow 工作流管理]
-    MB[📊 Metabase 商業智慧]
-  end
+        subgraph "C[☁️ Google Cloud Platform]"
+            C1[📊 BigQuery <br> (數據倉儲)]
+        end
+    end
 
-  %% Cloud Services
-  subgraph "☁️ Google Cloud Platform"
-    BQ[📊 BigQuery 數據倉儲]
-  end
+    %% Data Flow
+    A1 & A2 & A3 --> B2
+    B2 -- 觸發 --> B1
+    B1 -- 寫入 --> B3
+    B2 -- 同步 --> C1
+    B3 -.-> B2
+    B3 --> B4
+    C1 --> B4
+    
+    %% Network
+    subgraph D[🌐 Docker 網路: NBA_network]
+        B1 --- B2
+        B2 --- B3
+        B3 --- B4
+    end
 
-  %% Docker network
-  subgraph "🌐 Docker 網路"
-    NET[my_network]
-  end
+    %% Styles
+    classDef source fill:#fff0f0,stroke:#ff6d6d,stroke-width:2px;
+    classDef docker fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px;
+    classDef cloud fill:#e6f7ff,stroke:#00a2ff,stroke-width:2px;
+    classDef network fill:#f0fff0,stroke:#3cb371,stroke-width:2px;
 
-  %% Data flow
-  S1 --> P
-  S2 --> P
-  S3 --> P
-  P --> DB
-  DB --> BQ
-  DB --> MB
-  BQ --> MB
-  AF --> P
-  AF --> DB
-  AF --> BQ
-
-  %% Network connections
-  P --- NET
-  DB --- NET
-  AF --- NET
-  MB --- NET
-
-  %% Common exposed ports
-  DBp[🔌 埠號 3306]
-  AFp[🔌 埠號 8080]
-  MBp[🔌 埠號 3000]
-
-  DB --- DBp
-  AF --- AFp
-  MB --- MBp
-
-  %% Styles
-  classDef docker fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px,color:#0d47a1
-  classDef cloud fill:#fff3e0,stroke:#ff9800,stroke-width:2px,color:#e65100
-  classDef network fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
-  classDef port fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#e65100
-  classDef source fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#b71c1c
-
-  class P,DB,AF,MB docker
-  class BQ cloud
-  class NET network
-  class DBp,AFp,MBp port
-  class S1,S2,S3 source
+    class A,A1,A2,A3 source;
+    class B,B1,B2,B3,B4 docker;
+    class C,C1 cloud;
+    class D network
 ```
 
 ### 🎮 數據流程說明
@@ -161,15 +143,36 @@ flowchart LR
 ### 🏀 第一節：前置準備
 
 ```bash
-# 🏆 確保已安裝 Docker 與 Docker Compose
+# 🏆 確保已安裝 Docker 與 Docker Desktop
 docker --version
-docker-compose --version
 
 # 🌐 建立 Docker 網路（讓所有服務能夠完美配合）
-docker network create my_network
+docker network create NBA_network
 ```
 
-### 🏀 第二節：一鍵啟動所有服務
+### 🏀 第二節：環境設定與安裝
+
+#### 1. VSCode 遠端開發連線
+本專案建議使用 VSCode Remote - SSH 進行遠端開發，步驟如下：
+1.  **安裝 Remote - SSH 擴充功能**：在 VSCode 的擴充功能市集中搜尋並安裝 `Remote - SSH`。
+2.  **設定 SSH 連線**：
+    *   按下 `F1` 或 `Ctrl+Shift+P`，輸入 `Remote-SSH: Connect to Host...`。
+    *   選擇 `+ Add New SSH Host...`。
+    *   輸入 SSH 連線指令，格式為 `ssh <user>@<hostname>`，例如 `ssh myuser@192.168.1.100`。
+    *   選擇設定檔並儲存。
+3.  **連線至遠端主機**：
+    *   再次按下 `F1`，選擇 `Remote-SSH: Connect to Host...`。
+    *   選擇您剛剛設定的主機，即可在新視窗中開啟遠端連線。
+    *   在遠端視窗中開啟專案資料夾。
+
+#### 2. 安裝 Python 依賴套件
+本專案使用 `uv` 作為套件管理工具。請在連線至遠端主機後，於 VSCode 的終端機中執行以下指令安裝所有依賴項目：
+```bash
+# 同步 pyproject.toml 中的依賴項目
+uv sync
+```
+
+### 🏀 第三節：一鍵啟動所有服務
 
 像組建冠軍隊伍一樣，按順序啟動各個核心服務：
 
@@ -190,7 +193,7 @@ docker compose -f docker-compose-producer.yml up -d
 docker compose -f metabase/docker-compose-metabase.yml up -d
 ```
 
-### 🏀 第三節：BigQuery 設定
+### 🏀 第四節：BigQuery 設定
 
 在啟動服務前，請先設定 Google Cloud Platform：
 
@@ -204,13 +207,13 @@ docker compose -f metabase/docker-compose-metabase.yml up -d
 # GOOGLE_APPLICATION_CREDENTIALS=./key.json
 ```
 
-### 🏀 第四節：服務入口與管理介面
+### 🏀 第五節：服務入口與管理介面
 
 | 🎯 服務 | 🌐 網址 | 👤 帳號密碼 | 📝 說明 |
 |---------|---------|-------------|---------|
-| **🚀 Airflow** | http://localhost:8080 | `airflow` / `airflow` | 工作流管理與監控中心 |
-| **📊 Metabase** | http://localhost:3000 | 初次設定 | 商業智慧分析平台 |
-| **🗄️ MySQL** | localhost:3306 | 配置檔設定 | 資料庫連接 |
+| **🚀 Airflow** | http://35.206.118.222:8080 | `airflow` / `airflow` | 工作流管理與監控中心 |
+| **📊 Metabase** | http://35.206.118.222:3000 | 初次設定 | 商業智慧分析平台 |
+| **🗄️ MySQL** | http://35.206.118.222:3306 | 配置檔設定 | 資料庫連接 |
 | **☁️ BigQuery** | GCP Console | GCP 帳號 | 雲端數據倉儲 |
 
 ---
@@ -250,7 +253,7 @@ MYSQL_DATABASE=NBA
 
 # Google Cloud Platform 設定
 GCP_PROJECT_ID=your-gcp-project-id
-GOOGLE_APPLICATION_CREDENTIALS=./key.json
+
 ```
 
 ### 🎮 自訂工作流程
