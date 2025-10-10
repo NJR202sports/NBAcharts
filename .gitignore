@@ -1,9 +1,10 @@
 .venv/
 output/
 *.pyc
-.cache
+*.cache
 *.csv
 .env
 .env.example
 airflow/logs/
 key.json
+*.jpg

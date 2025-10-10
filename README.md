@@ -6,6 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Apache Airflow](https://img.shields.io/badge/Apache%20Airflow-017CEE?style=for-the-badge&logo=Apache%20Airflow&logoColor=white)](https://airflow.apache.org)
 [![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
+[![BigQuery](https://img.shields.io/badge/BigQuery-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white)](https://cloud.google.com/bigquery)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
 [![Celery](https://img.shields.io/badge/Celery-37B24D?style=for-the-badge&logo=celery&logoColor=white)](https://docs.celeryproject.org)
 
@@ -24,10 +25,11 @@
 ### 🎯 核心特性
 
 - **🏀 NBA全方位數據** - 涵蓋球隊與球員的狀態、進階統計、薪資分析與最新新聞
-- **📨 分散式任務處理** - 使用 RabbitMQ 作為訊息代理，搭配 Celery Workers 實現高效能非同步處理
 - **🗓️ 智慧工作流管理** - Airflow DAGs 實現數據擷取任務的自動排程與全面監控
 - **🗄️ 企業級數據存儲** - 採用 MySQL 資料庫確保數據完整性與查詢效能
-- **📊 商業智慧視覺化** - 透過 Metabase 建立專業級互動式儀表板
+- **☁️ 雲端數據倉儲** - 整合 Google BigQuery 實現大數據分析與長期存儲
+- **🔄 自動化數據同步** - MySQL 到 BigQuery 的自動同步機制
+- **� 商業智慧視覺化** - 透過 Metabase 建立專業級互動式儀表板
 - **🐳 一鍵容器化部署** - 每個服務獨立容器化，透過共用網路實現完美互聯
 
 ---
@@ -49,11 +51,14 @@ flowchart LR
   subgraph "🐳 Docker 容器生態系統"
     direction TB
     P[🐍 Python 數據擷取引擎]
-    Q[🐰 RabbitMQ 訊息代理]
-    W[⚡ Celery 分散式工作者]
     DB[🗄️ MySQL 資料庫]
     AF[🚀 Airflow 工作流管理]
     MB[📊 Metabase 商業智慧]
+  end
+
+  %% Cloud Services
+  subgraph "☁️ Google Cloud Platform"
+    BQ[📊 BigQuery 數據倉儲]
   end
 
   %% Docker network
@@ -65,51 +70,49 @@ flowchart LR
   S1 --> P
   S2 --> P
   S3 --> P
-  P --> Q
-  Q --> W
-  W --> DB
+  P --> DB
+  DB --> BQ
   DB --> MB
+  BQ --> MB
   AF --> P
-  AF --> W
   AF --> DB
+  AF --> BQ
 
   %% Network connections
   P --- NET
-  Q --- NET
-  W --- NET
   DB --- NET
   AF --- NET
   MB --- NET
 
   %% Common exposed ports
-  Qp[🔌 埠號 15672, 5672, 5555]
   DBp[🔌 埠號 3306]
   AFp[🔌 埠號 8080]
   MBp[🔌 埠號 3000]
 
-  Q --- Qp
   DB --- DBp
   AF --- AFp
   MB --- MBp
 
   %% Styles
   classDef docker fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px,color:#0d47a1
+  classDef cloud fill:#fff3e0,stroke:#ff9800,stroke-width:2px,color:#e65100
   classDef network fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
   classDef port fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#e65100
   classDef source fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#b71c1c
 
-  class P,Q,W,DB,AF,MB docker
+  class P,DB,AF,MB docker
+  class BQ cloud
   class NET network
-  class Qp,DBp,AFp,MBp port
+  class DBp,AFp,MBp port
   class S1,S2,S3 source
 ```
 
 ### 🎮 數據流程說明
 1. **🏀 多源數據擷取** - Python爬蟲引擎同步擷取NBA官方、薪資、新聞等多元數據
-2. **⚡ 智慧任務分發** - RabbitMQ高效分發任務到Celery分散式工作者
-3. **🔄 自動化編排** - Airflow DAG智慧管理整個ETL流程
-4. **💾 可靠數據存儲** - MySQL確保數據完整性與高效查詢
-5. **📈 專業視覺化** - Metabase打造企業級分析儀表板
+2. **🔄 自動化編排** - Airflow DAG智慧管理整個ETL流程
+3. **💾 可靠數據存儲** - MySQL確保數據完整性與高效查詢
+4. **☁️ 雲端數據倉儲** - 自動同步數據到BigQuery進行大數據分析
+5. **📈 專業視覺化** - Metabase整合MySQL與BigQuery打造企業級分析儀表板
 
 ---
 
@@ -126,14 +129,17 @@ flowchart LR
 │   ├── 📰 nba_news_headline.py     # NBA官方新聞
 │   ├── 📰 nba_news_udn.py          # UDN體育新聞
 │   ├── 🔧 config.py                # 環境配置管理
-│   ├── 🗄️ mysql.py                 # 資料庫連接與表結構
+│   ├── 🗄️ mysql.py                 # MySQL資料庫連接與表結構
+│   ├── ☁️ bigquery.py              # BigQuery資料庫操作
+│   ├── 🔄 nba_sync_mysql_to_bigquery.py # MySQL到BigQuery同步
 │   ├── ⚡ worker.py                # Celery工作者配置
 │   └── 🔄 dataprocess.py           # 數據處理與合併
 │
 ├── 🚀 airflow/                     # Apache Airflow 工作流
 │   ├── 📋 dags/
 │   │   ├── 🏀 NBA_data_dag.py      # NBA數據處理DAG
-│   │   └── 📰 NBA_news_dag.py      # 新聞擷取DAG
+│   │   ├── 📰 NBA_news_dag.py      # 新聞擷取DAG
+│   │   └── ☁️ NBA_bigquery_dag.py  # BigQuery同步DAG
 │   ├── ⚙️ airflow.cfg              # Airflow配置
 │   └── 🐳 docker-compose-airflow.yml
 │
@@ -141,7 +147,6 @@ flowchart LR
 │   └── 🐳 docker-compose-metabase.yml
 │
 ├── 🐳 Docker配置檔案
-│   ├── docker-compose-broker.yml   # RabbitMQ訊息佇列
 │   ├── docker-compose-mysql.yml    # MySQL資料庫
 │   ├── docker-compose-producer.yml # 任務生產者
 │   └── docker-compose-worker.yml   # Celery工作者
@@ -169,34 +174,44 @@ docker network create my_network
 像組建冠軍隊伍一樣，按順序啟動各個核心服務：
 
 ```bash
-# 🐰 1. 啟動訊息代理 (RabbitMQ/Flower)
-docker compose -f docker-compose-broker.yml up -d
-
-# 🗄️ 2. 啟動資料庫 (MySQL)
+# 🗄️ 1. 啟動資料庫 (MySQL)
 docker compose -f docker-compose-mysql.yml up -d
 
-# 🚀 3. 啟動 Airflow (Scheduler/Webserver)
+# 🚀 2. 啟動 Airflow (Scheduler/Webserver)
 docker compose -f airflow/docker-compose-airflow.yml up -d
 
-# ⚡ 4. 啟動任務 Workers (Celery)
+# ⚡ 3. 啟動任務 Workers (Celery)
 docker compose -f docker-compose-worker.yml up -d
 
-# 🕷️ 5. 啟動數據擷取 Producers
+# 🕷️ 4. 啟動數據擷取 Producers
 docker compose -f docker-compose-producer.yml up -d
 
-# 📊 6. 啟動儀表板 (Metabase)
+# 📊 5. 啟動儀表板 (Metabase)
 docker compose -f metabase/docker-compose-metabase.yml up -d
 ```
 
-### 🏀 第三節：服務入口與管理介面
+### 🏀 第三節：BigQuery 設定
+
+在啟動服務前，請先設定 Google Cloud Platform：
+
+```bash
+# ☁️ 1. 設定 GCP 認證金鑰
+# 將您的 service account key 放置於專案根目錄，命名為 key.json
+
+# 🔧 2. 設定環境變數
+# 在 .env 檔案中加入：
+# GCP_PROJECT_ID=your-project-id
+# GOOGLE_APPLICATION_CREDENTIALS=./key.json
+```
+
+### 🏀 第四節：服務入口與管理介面
 
 | 🎯 服務 | 🌐 網址 | 👤 帳號密碼 | 📝 說明 |
 |---------|---------|-------------|---------|
 | **🚀 Airflow** | http://localhost:8080 | `airflow` / `airflow` | 工作流管理與監控中心 |
-| **🐰 RabbitMQ** | http://localhost:15672 | `guest` / `guest` | 訊息佇列管理介面 |
-| **🌸 Flower** | http://localhost:5555 | - | Celery任務監控儀表板 |
 | **📊 Metabase** | http://localhost:3000 | 初次設定 | 商業智慧分析平台 |
 | **🗄️ MySQL** | localhost:3306 | 配置檔設定 | 資料庫連接 |
+| **☁️ BigQuery** | GCP Console | GCP 帳號 | 雲端數據倉儲 |
 
 ---
 
@@ -233,11 +248,9 @@ MYSQL_USERNAME=root
 MYSQL_PASSWORD=your_secure_password
 MYSQL_DATABASE=NBA
 
-# RabbitMQ 設定
-RABBITMQ_HOST=rabbitmq
-RABBITMQ_PORT=5672
-WORKER_USERNAME=worker
-WORKER_PASSWORD=worker_password
+# Google Cloud Platform 設定
+GCP_PROJECT_ID=your-gcp-project-id
+GOOGLE_APPLICATION_CREDENTIALS=./key.json
 ```
 
 ### 🎮 自訂工作流程
@@ -280,7 +293,6 @@ docker compose -f docker-compose-producer.yml down
 docker compose -f docker-compose-worker.yml down
 docker compose -f airflow/docker-compose-airflow.yml down
 docker compose -f docker-compose-mysql.yml down
-docker compose -f docker-compose-broker.yml down
 ```
 
 ---
@@ -290,16 +302,22 @@ docker compose -f docker-compose-broker.yml down
 ### 常見問題與解決方案
 
 - **❓ 看不到任務在執行？**
-  - 檢查 RabbitMQ、Celery Workers 與 Airflow 排程是否正常啟用
+  - 檢查 Celery Workers 與 Airflow 排程是否正常啟用
   - 確認 Airflow Web UI 中的 DAG 已啟用
 
 - **❓ 資料未寫入 MySQL？**
   - 檢查 [`mysql.py`](data_ingestion/mysql.py) 的連線設定
   - 確認資料表是否正確初始化
 
+- **❓ BigQuery 同步失敗？**
+  - 檢查 GCP 認證金鑰是否正確設定
+  - 確認 [`bigquery.py`](data_ingestion/bigquery.py) 的專案ID設定
+  - 檢查 BigQuery API 是否已啟用
+
 - **❓ Metabase 看不到資料？**
   - 確認 Metabase 能連線到 MySQL 容器（同一 network）
   - 檢查資料庫連接設定
+  - 可嘗試連接 BigQuery 作為額外數據源
 
 - **❓ 容器間連線失敗？**
   - 確認所有容器都加入了 `my_network`
@@ -323,6 +341,37 @@ docker compose -f docker-compose-broker.yml down
 
 ---
 
+## ☁️ BigQuery 整合
+
+### 🎯 BigQuery 功能特色
+- **📊 大數據分析** - 支援PB級數據的快速查詢與分析
+- **🔄 自動同步** - 透過 [`NBA_bigquery_dag.py`](airflow/dags/NBA_bigquery_dag.py) 定期同步MySQL數據
+- **📈 進階分析** - 利用BigQuery的SQL分析功能進行複雜統計
+- **💰 成本效益** - 按查詢量計費，適合大規模數據分析
+
+### 🔧 BigQuery 設定步驟
+1. **建立GCP專案** - 在Google Cloud Console建立新專案
+2. **啟用BigQuery API** - 確保BigQuery API已啟用
+3. **建立Service Account** - 下載JSON金鑰檔案
+4. **設定環境變數** - 在 `.env` 檔案中配置專案ID和金鑰路徑
+
+### 📊 數據同步流程
+```mermaid
+flowchart TD
+    A[MySQL 資料庫] --> B[Airflow BigQuery DAG]
+    B --> C[讀取 MySQL 資料]
+    C --> D[資料轉換與清理]
+    D --> E[上傳至 BigQuery]
+    E --> F[BigQuery 資料倉儲]
+    F --> G[Metabase 視覺化]
+    
+    style A fill:#e3f2fd
+    style F fill:#fff3e0
+    style G fill:#e8f5e9
+```
+
+---
+
 ## 🏆 技術棧
 
 ### 🔧 核心技術
@@ -332,18 +381,17 @@ docker compose -f docker-compose-broker.yml down
 - **🗄️ SQLAlchemy** - ORM與資料庫操作
 
 ### ⚡ 分散式系統
-- **🐰 RabbitMQ** - 高效能訊息佇列
 - **⚡ Celery** - 分散式任務處理
 - **🚀 Apache Airflow** - 工作流程編排與調度
 
 ### 🗄️ 資料存儲與視覺化
 - **🐬 MySQL** - 關聯式資料庫
+- **☁️ Google BigQuery** - 雲端數據倉儲
 - **📊 Metabase** - 商業智慧與視覺化
 
 ### 🐳 部署與維運
 - **🐳 Docker** - 容器化部署
 - **🔧 Docker Compose** - 多服務編排
-- **🌸 Flower** - Celery任務監控
 
 ---
 
@@ -382,6 +430,7 @@ docker compose -f docker-compose-broker.yml down
 - **📰 UDN體育** - 中文體育新聞整合
 - **🐍 Python社群** - 優秀的開源工具與函式庫
 - **🚀 Apache基金會** - Airflow工作流程管理工具
+- **☁️ Google Cloud** - BigQuery雲端數據倉儲服務
 
 ---
 
