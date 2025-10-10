@@ -35,7 +35,59 @@
 
 ## 🏗️ 系統架構
 
-![系統架構圖](images/Diagram.jpg)
+```mermaid
+graph LR
+    %% Define Groups
+    subgraph DS[🌐 資料來源]
+        direction TB
+        S1[NBA.com API]
+        S2[HoopsHype]
+        S3[UDN News]
+    end
+
+    subgraph DE[🐳 Docker 化服務]
+        direction TB
+        P[🐍 數據擷取引擎]
+        A[🚀 Airflow<br>工作流管理]
+        M[🗄️ MySQL<br>主要數據庫]
+    end
+
+    subgraph GCP[☁️ Google Cloud Platform]
+        B[📊 BigQuery<br>數據倉儲]
+    end
+
+    subgraph BI[🔮 商業智慧]
+        Metabase[📊 Metabase<br>儀表板]
+    end
+
+    %% Define Network
+    subgraph D_NET[🌐 Docker 網路: NBA_network]
+      P --- A --- M
+    end
+
+
+    %% Data Flow
+    DS --"批次擷取<br>(Batch Ingestion)"--> A
+    A --"觸發排程<br>(Trigger)"--> P
+    P --"寫入原始數據<br>(Write Raw Data)"--> M
+    A --"ETL 同步<br>(Sync & Transform)"--> B
+    M --"提供熱數據<br>(Hot Data)"--> Metabase
+    B --"提供分析數據<br>(Analytical Data)"--> Metabase
+
+
+    %% Styling
+    classDef datasource fill:#FFF3E0,stroke:#FF9800,stroke-width:2px,color:#333
+    classDef docker fill:#E3F2FD,stroke:#2196F3,stroke-width:2px,color:#333
+    classDef gcp fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px,color:#333
+    classDef bi fill:#FCE4EC,stroke:#E91E63,stroke-width:2px,color:#333
+    classDef network fill:#FAFAFA,stroke:#BDBDBD,stroke-width:2px,color:#333,stroke-dasharray: 5 5
+
+    class DS,S1,S2,S3 datasource
+    class DE,P,A,M docker
+    class GCP,B gcp
+    class BI,Metabase bi
+    class D_NET network
+```
 
 ### 🎮 數據流程說明
 1. **🏀 多源數據擷取** - Python爬蟲引擎同步擷取NBA官方、薪資、新聞等多元數據
@@ -78,8 +130,6 @@
 │
 ├── 🐳 Docker配置檔案
 │   ├── docker-compose-mysql.yml    # MySQL資料庫
-│   ├── docker-compose-producer.yml # 任務生產者
-│   └── docker-compose-worker.yml   # Celery工作者
 │
 └── 📋 pyproject.toml               # Python專案配置
 ```
@@ -100,45 +150,48 @@ docker network create NBA_network
 
 ### 🏀 第二節：環境設定與安裝
 
-#### 1. VSCode 遠端開發連線
-本專案建議使用 VSCode Remote - SSH 進行遠端開發，步驟如下：
-1.  **安裝 Remote - SSH 擴充功能**：在 VSCode 的擴充功能市集中搜尋並安裝 `Remote - SSH`。
-2.  **設定 SSH 連線**：
-    *   按下 `F1` 或 `Ctrl+Shift+P`，輸入 `Remote-SSH: Connect to Host...`。
-    *   選擇 `+ Add New SSH Host...`。
-    *   輸入 SSH 連線指令，格式為 `ssh <user>@<hostname>`，例如 `ssh myuser@192.168.1.100`。
-    *   選擇設定檔並儲存。
-3.  **連線至遠端主機**：
-    *   再次按下 `F1`，選擇 `Remote-SSH: Connect to Host...`。
-    *   選擇您剛剛設定的主機，即可在新視窗中開啟遠端連線。
-    *   在遠端視窗中開啟專案資料夾。
-
-#### 2. 安裝 Python 依賴套件
-本專案使用 `uv` 作為套件管理工具。請在連線至遠端主機後，於 VSCode 的終端機中執行以下指令安裝所有依賴項目：
+#### 安裝 Python 依賴套件
+本專案使用 `uv` 作為套件管理工具。
 ```bash
 # 同步 pyproject.toml 中的依賴項目
 uv sync
 ```
 
-### 🏀 第三節：一鍵啟動所有服務
+#### 環境變數設定
 
-像組建冠軍隊伍一樣，按順序啟動各個核心服務：
+專案的環境變數儲存在 `.env` 檔案中，您可以從 `env.example` 複製一份來開始。
+
+```bash
+# 從範例文件複製一份 .env 設定檔
+cp env.example .env
+```
+接著，請根據您的本機環境或需求，修改 `.env` 檔案中的設定值，例如資料庫密碼或 GCP 專案 ID。
+
+```bash
+# .env 檔案內容範例
+# MySQL 配置
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=your_secure_password # <== 修改為你的密碼
+MYSQL_ROOT_PASSWORD=your_secure_password # <== 修改為你的密碼
+
+# GCP 配置
+GCP_PROJECT_ID=your-gcp-project-id # <== 修改為你的GCP專案ID
+```
+
+### 🏀 第三節：啟動所有服務
+按順序啟動各個核心服務：
 
 ```bash
 # 🗄️ 1. 啟動資料庫 (MySQL)
-docker compose -f docker-compose-mysql.yml up -d
+docker compose --env-file .env -f docker-compose-mysql.yml up -d
 
 # 🚀 2. 啟動 Airflow (Scheduler/Webserver)
-docker compose -f airflow/docker-compose-airflow.yml up -d
+docker compose --env-file .env -f airflow/docker-compose-airflow.yml up -d
 
-# ⚡ 3. 啟動任務 Workers (Celery)
-docker compose -f docker-compose-worker.yml up -d
-
-# 🕷️ 4. 啟動數據擷取 Producers
-docker compose -f docker-compose-producer.yml up -d
-
-# 📊 5. 啟動儀表板 (Metabase)
-docker compose -f metabase/docker-compose-metabase.yml up -d
+# 📊 3. 啟動儀表板 (Metabase)
+docker compose --env-file .env -f metabase/docker-compose-metabase.yml up -d
 ```
 
 ### 🏀 第四節：BigQuery 設定
@@ -146,13 +199,10 @@ docker compose -f metabase/docker-compose-metabase.yml up -d
 在啟動服務前，請先設定 Google Cloud Platform：
 
 ```bash
-# ☁️ 1. 設定 GCP 認證金鑰
-# 將您的 service account key 放置於專案根目錄，命名為 key.json
 
-# 🔧 2. 設定環境變數
+# 🔧 設定環境變數
 # 在 .env 檔案中加入：
 # GCP_PROJECT_ID=your-project-id
-# GOOGLE_APPLICATION_CREDENTIALS=./key.json
 ```
 
 ### 🏀 第五節：服務入口與管理介面
@@ -204,33 +254,6 @@ GCP_PROJECT_ID=your-gcp-project-id
 
 ```
 
-### 🎮 自訂工作流程
-
-```python
-# 🏀 建立自訂DAG範例
-from airflow import DAG
-from data_ingestion.nba_players_salary import player_year_salary
-
-def my_custom_nba_analysis():
-    # 你的客製化分析邏輯
-    player_year_salary(2024)
-```
-
-### 🛠️ 開發者模式
-
-若需在本機進行開發測試（非正式流程）：
-
-```bash
-# 🔥 載入環境變數
-source .env
-
-# 🏀 執行單一爬蟲腳本
-uv run data_ingestion/producer_crawler_player_salary.py
-python data_ingestion/nba_news_udn.py
-
-# ⚡ 啟動本機Celery工作者
-uv run celery -A data_ingestion.worker worker --loglevel=info
-```
 
 ---
 
@@ -325,13 +348,12 @@ flowchart TD
 ## 🏆 技術棧
 
 ### 🔧 核心技術
-- **🐍 Python 3.8+** - 核心開發語言
+- **🐍 Python 3.10+** - 核心開發語言
 - **🕷️ BeautifulSoup4** - HTML解析與網頁爬蟲
 - **📊 Pandas** - 資料處理與分析
 - **🗄️ SQLAlchemy** - ORM與資料庫操作
 
-### ⚡ 分散式系統
-- **⚡ Celery** - 分散式任務處理
+### ⚡ 自動化系統
 - **🚀 Apache Airflow** - 工作流程編排與調度
 
 ### 🗄️ 資料存儲與視覺化
