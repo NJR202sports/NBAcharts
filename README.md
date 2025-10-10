@@ -50,14 +50,14 @@ graph TD
         
         subgraph "B[🐳 Docker 容器化服務]"
             direction TB
-            B1[🐍 Python Producers <br> (數據擷取引擎)]
-            B2[🚀 Airflow <br> (工作流管理)]
-            B3[🗄️ MySQL <br> (主要數據庫)]
-            B4[📊 Metabase <br> (商業智慧儀表板)]
+            B1["🐍 Python Producers <br> (數據擷取引擎)"]
+            B2["🚀 Airflow <br> (工作流管理)"]
+            B3["🗄️ MySQL <br> (主要數據庫)"]
+            B4["📊 Metabase <br> (商業智慧儀表板)"]
         end
 
         subgraph "C[☁️ Google Cloud Platform]"
-            C1[📊 BigQuery <br> (數據倉儲)]
+            C1["📊 BigQuery <br> (數據倉儲)"]
         end
     end
 
@@ -305,7 +305,6 @@ docker compose -f docker-compose-mysql.yml down
 ### 常見問題與解決方案
 
 - **❓ 看不到任務在執行？**
-  - 檢查 Celery Workers 與 Airflow 排程是否正常啟用
   - 確認 Airflow Web UI 中的 DAG 已啟用
 
 - **❓ 資料未寫入 MySQL？**
@@ -323,7 +322,7 @@ docker compose -f docker-compose-mysql.yml down
   - 可嘗試連接 BigQuery 作為額外數據源
 
 - **❓ 容器間連線失敗？**
-  - 確認所有容器都加入了 `my_network`
+  - 確認所有容器都加入了 `NBA_network`
   - 檢查 `.env` 與各 compose 檔中的服務主機名稱、帳密、埠號一致
 
 ---
@@ -417,12 +416,6 @@ flowchart TD
 - **⚡ 效能優化** - 提升系統處理效率
 
 在提交 PR 前，請簡述您的修改動機與測試步驟。建議新增 `.env.example` 與 Metabase dashboard 匯出檔，提升新手上手速度。
-
----
-
-## 📄 授權條款
-
-本專案採用 MIT 授權條款 - 詳見 [LICENSE](LICENSE) 檔案
 
 ---
 
