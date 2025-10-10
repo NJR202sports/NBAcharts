@@ -35,52 +35,7 @@
 
 ## 🏗️ 系統架構
 
-```mermaid
-graph TD
-    %% 定義風格：數據流用藍色
-    linkStyle default stroke:#007bff,stroke-width:2px
-
-    subgraph Development and Environment
-        D1[Visual Studio Code] --> D2(Ubuntu OS / VM)
-        D1 -- Code/Config Sync --> D3(GitHub)
-    end
-
-    subgraph Data Source and Extraction (ETL - E)
-        E1[Source 1: External API / Website]
-        E2[Source 2: External API / Website]
-        E1 --> P(Python Script/Framework)
-        E2 --> P
-        D3 --> P %% Python 程式碼來自 GitHub
-        P --> S{Scraper / Web Crawler}
-    end
-
-    subgraph Data Pipeline and Storage (ETL - T and L)
-        S --> M[MySQL Database]
-        M --> M2(phpMyAdmin for Management)
-
-        M --> BQ[BigQuery Data Warehouse]
-    end
-
-    subgraph Automation and Orchestration
-        D1 -- DAGs/Code -->> AF[Apache Airflow]
-        AF -- Schedule/Trigger -->> P %% Airflow 調度 Python 爬蟲
-    end
-
-    subgraph Data Analysis and Visualization (BI)
-        BQ --> MB[Metabase BI Tool]
-        BQ --> GCE(Google Compute Engine)
-        GCE -- Compute and Process -->> BQ
-        subgraph Google Cloud Platform
-            BQ
-            GCE
-        end
-    end
-
-    %% 主流程路徑總結
-    style P fill:#4CAF50,color:#fff
-    style M fill:#ADD8E6,color:#333
-    style BQ fill:#FFD700,color:#333
-    ```
+![系統架構圖](images/Diagram.jpg)
 
 ### 🎮 數據流程說明
 1. **🏀 多源數據擷取** - Python爬蟲引擎同步擷取NBA官方、薪資、新聞等多元數據
