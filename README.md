@@ -36,58 +36,51 @@
 ## 🏗️ 系統架構
 
 ```mermaid
-graph LR
-    %% Define Groups
-    subgraph DS[🌐 資料來源]
-        direction TB
-        S1[NBA.com API]
-        S2[HoopsHype]
-        S3[UDN News]
+graph TD
+    %% 定義風格：數據流用藍色
+    linkStyle default stroke:#007bff,stroke-width:2px
+
+    subgraph Development & Environment
+        D1[Visual Studio Code] --> D2(Ubuntu OS / VM)
+        D1 -- Code/Config Sync --> D3(GitHub)
     end
 
-    subgraph DE[🐳 Docker 化服務]
-        direction TB
-        P[🐍 數據擷取引擎]
-        A[🚀 Airflow<br>工作流管理]
-        M[🗄️ MySQL<br>主要數據庫]
+    subgraph Data Source & Extraction (ETL - E)
+        E1[Source 1: External API / Website]
+        E2[Source 2: External API / Website]
+        E1 --> P(Python Script/Framework)
+        E2 --> P
+        D3 --> P %% Python 程式碼來自 GitHub
+        P --> S{Scraper / Web Crawler}
     end
 
-    subgraph GCP[☁️ Google Cloud Platform]
-        B[📊 BigQuery<br>數據倉儲]
+    subgraph Data Pipeline & Storage (ETL - T & L)
+        S --> M[MySQL Database]
+        M --> M2(phpMyAdmin for Management)
+
+        M --> BQ[BigQuery Data Warehouse]
     end
 
-    subgraph BI[🔮 商業智慧]
-        Metabase[📊 Metabase<br>儀表板]
+    subgraph Automation & Orchestration
+        D1 -- DAGs/Code -->> AF[Apache Airflow]
+        AF -- Schedule/Trigger -->> P %% Airflow 調度 Python 爬蟲
     end
 
-    %% Define Network
-    subgraph D_NET[🌐 Docker 網路: NBA_network]
-      P --- A --- M
+    subgraph Data Analysis & Visualization (BI)
+        BQ --> MB[Metabase BI Tool]
+        BQ --> GCE(Google Compute Engine)
+        GCE -- Compute & Process -->> BQ
+        subgraph Google Cloud Platform
+            BQ
+            GCE
+        end
     end
 
-
-    %% Data Flow
-    DS --"批次擷取<br>(Batch Ingestion)"--> A
-    A --"觸發排程<br>(Trigger)"--> P
-    P --"寫入原始數據<br>(Write Raw Data)"--> M
-    A --"ETL 同步<br>(Sync & Transform)"--> B
-    M --"提供熱數據<br>(Hot Data)"--> Metabase
-    B --"提供分析數據<br>(Analytical Data)"--> Metabase
-
-
-    %% Styling
-    classDef datasource fill:#FFF3E0,stroke:#FF9800,stroke-width:2px,color:#333
-    classDef docker fill:#E3F2FD,stroke:#2196F3,stroke-width:2px,color:#333
-    classDef gcp fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px,color:#333
-    classDef bi fill:#FCE4EC,stroke:#E91E63,stroke-width:2px,color:#333
-    classDef network fill:#FAFAFA,stroke:#BDBDBD,stroke-width:2px,color:#333,stroke-dasharray: 5 5
-
-    class DS,S1,S2,S3 datasource
-    class DE,P,A,M docker
-    class GCP,B gcp
-    class BI,Metabase bi
-    class D_NET network
-```
+    %% 主流程路徑總結
+    style P fill:#4CAF50,color:#fff
+    style M fill:#ADD8E6,color:#333
+    style BQ fill:#FFD700,color:#333
+    ```
 
 ### 🎮 數據流程說明
 1. **🏀 多源數據擷取** - Python爬蟲引擎同步擷取NBA官方、薪資、新聞等多元數據
