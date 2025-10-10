@@ -40,12 +40,12 @@ graph TD
     %% 定義風格：數據流用藍色
     linkStyle default stroke:#007bff,stroke-width:2px
 
-    subgraph Development & Environment
+    subgraph Development and Environment
         D1[Visual Studio Code] --> D2(Ubuntu OS / VM)
         D1 -- Code/Config Sync --> D3(GitHub)
     end
 
-    subgraph Data Source & Extraction (ETL - E)
+    subgraph Data Source and Extraction (ETL - E)
         E1[Source 1: External API / Website]
         E2[Source 2: External API / Website]
         E1 --> P(Python Script/Framework)
@@ -54,22 +54,22 @@ graph TD
         P --> S{Scraper / Web Crawler}
     end
 
-    subgraph Data Pipeline & Storage (ETL - T & L)
+    subgraph Data Pipeline and Storage (ETL - T and L)
         S --> M[MySQL Database]
         M --> M2(phpMyAdmin for Management)
 
         M --> BQ[BigQuery Data Warehouse]
     end
 
-    subgraph Automation & Orchestration
+    subgraph Automation and Orchestration
         D1 -- DAGs/Code -->> AF[Apache Airflow]
         AF -- Schedule/Trigger -->> P %% Airflow 調度 Python 爬蟲
     end
 
-    subgraph Data Analysis & Visualization (BI)
+    subgraph Data Analysis and Visualization (BI)
         BQ --> MB[Metabase BI Tool]
         BQ --> GCE(Google Compute Engine)
-        GCE -- Compute & Process -->> BQ
+        GCE -- Compute and Process -->> BQ
         subgraph Google Cloud Platform
             BQ
             GCE
