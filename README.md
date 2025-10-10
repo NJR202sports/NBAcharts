@@ -35,7 +35,52 @@
 
 ## 🏗️ 系統架構
 
-![系統架構圖](images/Diagram.jpg)
+graph TD
+    %% 定義風格：數據流用藍色
+    linkStyle default stroke:#007bff,stroke-width:2px
+
+    subgraph Development & Environment
+        D1[Visual Studio Code] --> D2(Ubuntu OS / VM)
+        D1 -- Code/Config Sync --> D3(GitHub)
+    end
+
+    subgraph Data Source & Extraction (ETL - E)
+        E1[Source 1: External API / Website]
+        E2[Source 2: External API / Website]
+        E1 --> P(Python Script/Framework)
+        E2 --> P
+        D3 --> P %% Python 程式碼來自 GitHub
+        P --> S{Scraper / Web Crawler}
+    end
+
+    subgraph Data Pipeline & Storage (ETL - T & L)
+        S --> M[MySQL Database]
+        M --> M2(phpMyAdmin for Management)
+
+        M --> BQ[BigQuery Data Warehouse]
+    end
+
+    subgraph Automation & Orchestration
+        D1 -- DAGs/Code -->> AF[Apache Airflow]
+        AF -- Schedule/Trigger -->> P %% Airflow 調度 Python 爬蟲
+    end
+
+    subgraph Data Analysis & Visualization (BI)
+        BQ --> MB[Metabase BI Tool]
+        BQ --> GCE(Google Compute Engine)
+        GCE -- Compute & Process -->> BQ
+        subgraph Google Cloud Platform
+            BQ
+            GCE
+        end
+    end
+
+    %% 主流程路徑總結
+    style P fill:#4CAF50,color:#fff
+    style M fill:#ADD8E6,color:#333
+    style BQ fill:#FFD700,color:#333
+
+
 
 ### 🎮 數據流程說明
 1. **🏀 多源數據擷取** - Python爬蟲引擎同步擷取NBA官方、薪資、新聞等多元數據
@@ -183,28 +228,6 @@ docker compose --env-file .env -f metabase/docker-compose-metabase.yml up -d
 
 ---
 
-## ⚡ 進階操作
-
-### 🔧 環境變數配置
-
-建議建立 `.env` 檔案進行環境配置：
-
-```bash
-# MySQL 資料庫設定
-MYSQL_HOST=mysql
-MYSQL_PORT=3306
-MYSQL_USERNAME=root
-MYSQL_PASSWORD=your_secure_password
-MYSQL_DATABASE=NBA
-
-# Google Cloud Platform 設定
-GCP_PROJECT_ID=your-gcp-project-id
-
-```
-
-
----
-
 ## 🛑 關閉服務
 
 若要停止並移除所有容器，請依相反順序執行：
@@ -292,8 +315,6 @@ flowchart TD
 ```
 
 ---
-
-## 🏆 技術棧
 
 ### 🔧 核心技術
 - **🐍 Python 3.10+** - 核心開發語言
