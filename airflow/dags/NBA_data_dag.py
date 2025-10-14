@@ -61,7 +61,7 @@ with DAG(
     dag_id='crawler_NBA_data',
     default_args=default_args,
     description='nba player & team information',
-    schedule_interval=None,  
+    schedule_interval='0 9 * * *',  # 每天早上 9 點執行  
     catchup=False,  # 不執行歷史任務
     max_active_runs=1,  # 同時只允許一個 DAG 實例運行
     tags=['NBA', 'crawler', 'player', 'team'],
