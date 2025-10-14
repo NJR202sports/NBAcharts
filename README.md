@@ -265,17 +265,6 @@ flowchart TD
 
 ---
 
-## 🙏 致謝
-
-- **🏀 NBA.com** - 提供官方數據與新聞來源
-- **💰 HoopsHype** - 球員薪資數據來源
-- **📰 UDN體育** - 中文體育新聞整合
-- **🐍 Python社群** - 優秀的開源工具與函式庫
-- **🚀 Apache基金會** - Airflow工作流程管理工具
-- **☁️ Google Cloud** - BigQuery雲端數據倉儲服務
-
----
-
 <div align="center">
 
 ### 🏆 讓數據說話，讓分析發光！
